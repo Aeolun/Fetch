@@ -219,7 +219,7 @@ class Message
 
             return false;
 
-        $this->subject = isset($messageOverview->subject) ? $messageOverview->subject : null;
+        $this->subject = isset($messageOverview->subject) ? imap_utf8($messageOverview->subject) : null;
         $this->date    = strtotime($messageOverview->date);
         $this->size    = $messageOverview->size;
 
@@ -293,6 +293,12 @@ class Message
 
             // convert raw header string into a usable object
             $headerObject = imap_rfc822_parse_headers($rawHeaders);
+
+            foreach($headerObject as $key => $value) {
+                if(is_string($value)) {
+                    $headerObject->$key = imap_utf8($value);
+                }
+            }
 
             // to keep this object as close as possible to the original header object we add the udate property
             $headerObject->udate = strtotime($headerObject->date);
