@@ -219,7 +219,7 @@ class Message
 
             return false;
 
-        $this->subject = isset($messageOverview->subject) ? imap_utf8($messageOverview->subject) : null;
+        $this->subject = isset($messageOverview->subject) ? $this->decodeHeader($messageOverview->subject) : null;
         $this->date    = strtotime($messageOverview->date);
         $this->size    = $messageOverview->size;
 
@@ -256,6 +256,15 @@ class Message
         }
 
         return true;
+    }
+
+    public function decodeHeader($value) {
+        $stuff = imap_mime_header_decode($value);
+        $new = '';
+        foreach($stuff as $part) {
+            $new .= iconv($part->charset, 'utf8', $part->text);
+        }
+        return $new;
     }
 
     /**
